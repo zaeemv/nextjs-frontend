@@ -23,7 +23,7 @@ export function LogoutButton() {
       onClick={handleLogout}
       variant="outline"
       size="sm"
-      className="fixed bottom-4 left-4 z-50 flex items-center gap-2"
+      className="fixed top-4 right-4 z-50 flex items-center gap-2"
     >
       <LogOut className="h-4 w-4" />
       Logout
