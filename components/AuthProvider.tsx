@@ -13,8 +13,8 @@ import { login as apiLogin, signup as apiSignup, logout as apiLogout, getCurrent
 // The shape of the authentication context.
 interface AuthContextType {
   user: any; // The current authenticated user object, or null if not logged in.
-  login: (data: { email: string; password: string }) => Promise<void>; // Function to log in
-  signup: (data: { email: string; password: string }) => Promise<void>; // Function to sign up
+  login: (data: { username: string; password: string }) => Promise<void>; // Function to log in
+  signup: (data: { username: string; email: string; full_name: string; password: string }) => Promise<void>; // Function to sign up
   logout: () => Promise<void>; // Function to log out
 }
 
@@ -38,15 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Calls the login API and updates user state on success.
-  // Stores the JWT token in localStorage.
-  const login = async (data: { email: string; password: string }) => {
+  // Expects username and password.
+  const login = async (data: { username: string; password: string }) => {
     await apiLogin(data);
     const user = await getCurrentUser();
     setUser(user);
   };
 
   // Calls the signup API and updates user state on success.
-  const signup = async (data: { email: string; password: string }) => {
+  // Expects username, email, full_name, and password.
+  const signup = async (data: { username: string; email: string; full_name: string; password: string }) => {
     await apiSignup(data);
     const user = await getCurrentUser();
     setUser(user);

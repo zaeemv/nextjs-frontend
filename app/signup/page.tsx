@@ -13,7 +13,7 @@ import Link from 'next/link'; // For navigation links
 const SignupPage = () => {
     // State for form fields
     const [formData, setFormData] = useState({
-        fullName: '',
+        full_name: '',
         username: '',
         email: '',
         password: '',
@@ -44,7 +44,12 @@ const SignupPage = () => {
         setError(null);
         setLoading(true);
         try {
-            await signup({ email: formData.email, password: formData.password });
+            await signup({
+                username: formData.username,
+                email: formData.email,
+                full_name: formData.full_name,
+                password: formData.password
+            });
             router.push('/login');
         } catch (err: any) {
             setError(err.message || 'Signup failed');
@@ -62,15 +67,15 @@ const SignupPage = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label htmlFor="fullName" className="block text-sm font-medium text-muted-foreground">
+                        <label htmlFor="full_name" className="block text-sm font-medium text-muted-foreground">
                             Full Name
                         </label>
                         <input
-                            id="fullName"
-                            name="fullName"
+                            id="full_name"
+                            name="full_name"
                             type="text"
                             required
-                            value={formData.fullName}
+                            value={formData.full_name}
                             onChange={handleChange}
                             className="w-full px-4 py-2 mt-1 bg-popover text-foreground border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary placeholder:text-muted-foreground"
                             placeholder="John Doe"

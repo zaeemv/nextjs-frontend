@@ -47,8 +47,8 @@ export const getCustomers = async (token?: string | null) => {
 
 // Sends login credentials to the backend and expects a JWT token in response.
 // The token is stored in localStorage for use in subsequent requests.
-export async function login({ email, password }: { email: string; password: string }) {
-  const res = await api.post('/login', { email, password });
+export async function login({ username, password }: { username: string; password: string }) {
+  const res = await api.post('/auth/login', { username, password });
   const { access_token } = res.data;
   if (access_token) {
     localStorage.setItem('token', access_token);
@@ -57,8 +57,9 @@ export async function login({ email, password }: { email: string; password: stri
 }
 
 // Registers a new user with the backend.
-export async function signup({ email, password }: { email: string; password: string }) {
-  const res = await api.post('/register', { email, password });
+// Expects username, email, full_name, and password in the request body.
+export async function signup({ username, email, full_name, password }: { username: string; email: string; full_name: string; password: string }) {
+  const res = await api.post('/auth/register', { username, email, full_name, password });
   return res.data;
 }
 
@@ -70,9 +71,12 @@ export async function logout() {
 }
 
 // Fetches the currently authenticated user's info using the JWT token.
-export async function getCurrentUser() {
+export async function getCurrentUser(token?: string | null) {
   try {
-    const res = await api.get('/me');
+    const config = token
+    ? { headers: { Authorization: `Bearer ${token}` } }
+    : undefined;
+    const res = await api.get('/auth/me', config);
     return res.data;
   } catch {
     return null;
