@@ -13,6 +13,7 @@ import { login as apiLogin, signup as apiSignup, logout as apiLogout, getCurrent
 // The shape of the authentication context.
 interface AuthContextType {
   user: any; // The current authenticated user object, or null if not logged in.
+  isLoading: boolean; // Whether auth state is still being checked
   login: (data: { username: string; password: string }) => Promise<void>; // Function to log in
   signup: (data: { username: string; email: string; full_name: string; password: string }) => Promise<void>; // Function to sign up
   logout: () => Promise<void>; // Function to log out
@@ -26,15 +27,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // AuthProvider wraps your app and manages authentication state.
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // On mount, check if the user is already authenticated (by checking for a JWT token).
   useEffect(() => {
     // If no token, user is not authenticated
     if (typeof window !== 'undefined' && !localStorage.getItem('token')) {
       setUser(null);
+      setIsLoading(false);
       return;
     }
-    getCurrentUser().then(setUser).catch(() => setUser(null));
+    getCurrentUser().then(setUser).catch(() => setUser(null)).finally(() => setIsLoading(false));
   }, []);
 
   // Calls the login API and updates user state on success.
@@ -42,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (data: { username: string; password: string }) => {
     await apiLogin(data);
     const user = await getCurrentUser();
+    console.log("Logged in user:", user);
     setUser(user);
   };
 
@@ -61,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Provide the user and auth functions to all children.
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

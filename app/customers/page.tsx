@@ -19,21 +19,27 @@ interface Customer {
 export default function CustomersPage() {
     // State for customers and loading
     const [customers, setCustomers] = useState<Customer[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    // Get user from AuthProvider
-    const { user } = useAuth();
+    const [isLoadingCustomers, setIsLoadingCustomers] = useState(true);
+    // Get user and loading state from AuthProvider
+    const { user, isLoading } = useAuth();
     // Router for navigation
     const router = useRouter();
 
     // Protects the page: if not authenticated (no JWT token), redirect to login
     useEffect(() => {
         if (typeof window !== 'undefined' && !localStorage.getItem('token')) {
+            console.log("No token found, redirecting to login");
+            router.replace('/login');
+            return;
+        }
+        // Only redirect if we've finished checking auth AND user is not logged in
+        if (user === null && !isLoading) {
+            console.log("User:", user, " isLoading:", isLoading);
+            console.log("User not authenticated, redirecting to login");
             router.replace('/login');
         }
-        if (user === null) {
-            router.replace('/login');
-        }
-    }, [user, router]);
+        
+    }, [user, isLoading, router]);
 
     // Fetches customers from the backend on mount
     useEffect(() => {
@@ -46,14 +52,14 @@ export default function CustomersPage() {
             } catch (error) {
                 console.error("Failed to fetch customers:", error);
             } finally {
-                setIsLoading(false);
+                setIsLoadingCustomers(false);
             }
         };
         fetchCustomers();
     }, []);
 
     // Show loading state while fetching
-    if (isLoading) {
+    if (isLoadingCustomers) {
         return <div className="p-8 text-center text-foreground">Loading...</div>;
     }
 

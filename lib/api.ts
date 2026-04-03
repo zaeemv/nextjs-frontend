@@ -41,14 +41,26 @@ export const getCustomers = async (token?: string | null) => {
   return res.data;
 };
 
-
-
 // Auth API functions
 
 // Sends login credentials to the backend and expects a JWT token in response.
+// Uses OAuth2 password flow format (form-encoded) as expected by FastAPI.
 // The token is stored in localStorage for use in subsequent requests.
 export async function login({ username, password }: { username: string; password: string }) {
-  const res = await api.post('/auth/login', { username, password });
+  // Create form-encoded data for OAuth2 password flow
+  const formData = new URLSearchParams();
+  formData.append('grant_type', 'password');
+  formData.append('username', username);
+  formData.append('password', password);
+  formData.append('scope', '');
+  formData.append('client_id', '');
+  formData.append('client_secret', '');
+
+  const res = await api.post('/auth/login', formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
   const { access_token } = res.data;
   if (access_token) {
     localStorage.setItem('token', access_token);
@@ -71,12 +83,14 @@ export async function logout() {
 }
 
 // Fetches the currently authenticated user's info using the JWT token.
+// Sends token in request body via POST request.
 export async function getCurrentUser(token?: string | null) {
   try {
-    const config = token
-    ? { headers: { Authorization: `Bearer ${token}` } }
-    : undefined;
-    const res = await api.get('/auth/me', config);
+    const tokenToUse = token || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+    if (!tokenToUse) {
+      return null;
+    }
+    const res = await api.post('/auth/validate', { token: tokenToUse });
     return res.data;
   } catch {
     return null;
