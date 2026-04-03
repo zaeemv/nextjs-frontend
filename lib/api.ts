@@ -31,8 +31,13 @@ api.interceptors.request.use((config) => {
 
 // Fetches the list of customers from the backend.
 // Requires a valid JWT token in the Authorization header.
-export const getCustomers = async () => {
-  const res = await api.get('/customers/');
+// Accepts an optional token argument for explicit header control.
+export const getCustomers = async (token?: string | null) => {
+  // If a token is provided, use it in the Authorization header for this request
+  const config = token
+    ? { headers: { Authorization: `Bearer ${token}` } }
+    : undefined;
+  const res = await api.get('/customers/', config);
   return res.data;
 };
 

@@ -1,4 +1,5 @@
 
+"use client"
 // AuthProvider.tsx
 // This component provides authentication state and functions (login, signup, logout)
 // to the rest of the app using React Context. It wraps your app and allows any child

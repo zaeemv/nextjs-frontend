@@ -9,13 +9,14 @@ import { useState, useEffect } from "react"; // For state and lifecycle
 import { getCustomers } from "@/lib/api"; // For fetching customers
 import { useAuth } from '@/components/AuthProvider'; // For auth state
 import { useRouter } from 'next/navigation'; // For navigation
-
+// Type definition for a customer
+interface Customer {
     id: string;
     name: string;
     contact_info: string;
-    // Customer type definition
 }
 
+export default function CustomersPage() {
     // State for customers and loading
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +39,9 @@ import { useRouter } from 'next/navigation'; // For navigation
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
-                const data = await getCustomers();
+                // Always send Authorization header with Bearer token
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+                const data = await getCustomers(token);
                 setCustomers(data);
             } catch (error) {
                 console.error("Failed to fetch customers:", error);
@@ -87,3 +90,4 @@ import { useRouter } from 'next/navigation'; // For navigation
         </div>
     );
 }
+                    
