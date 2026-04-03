@@ -1,18 +1,40 @@
+
+// customers/page.tsx
+// This page displays a list of customers and is protected by authentication.
+// If the user is not authenticated, they are redirected to the login page.
 "use client";
 
-import { useState, useEffect } from "react";
-import { getCustomers } from "@/lib/api";
 
-interface Customer {
+import { useState, useEffect } from "react"; // For state and lifecycle
+import { getCustomers } from "@/lib/api"; // For fetching customers
+import { useAuth } from '@/components/AuthProvider'; // For auth state
+import { useRouter } from 'next/navigation'; // For navigation
+
     id: string;
     name: string;
     contact_info: string;
+    // Customer type definition
 }
 
-export default function CustomersPage() {
+    // State for customers and loading
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    // Get user from AuthProvider
+    const { user } = useAuth();
+    // Router for navigation
+    const router = useRouter();
 
+    // Protects the page: if not authenticated (no JWT token), redirect to login
+    useEffect(() => {
+        if (typeof window !== 'undefined' && !localStorage.getItem('token')) {
+            router.replace('/login');
+        }
+        if (user === null) {
+            router.replace('/login');
+        }
+    }, [user, router]);
+
+    // Fetches customers from the backend on mount
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
@@ -27,10 +49,12 @@ export default function CustomersPage() {
         fetchCustomers();
     }, []);
 
+    // Show loading state while fetching
     if (isLoading) {
         return <div className="p-8 text-center text-foreground">Loading...</div>;
     }
 
+    // Render the customers table
     return (
         <div className="min-h-screen bg-background text-foreground p-8">
             <div className="max-w-6xl mx-auto">

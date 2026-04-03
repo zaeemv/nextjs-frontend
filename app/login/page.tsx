@@ -1,21 +1,46 @@
+
+// login/page.tsx
+// This page renders the login form and handles user authentication.
+// On successful login, the user is redirected to the customers page.
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { useState } from "react"; // For managing form state
+import { useAuth } from '@/components/AuthProvider'; // For accessing login function
+import { useRouter } from 'next/navigation'; // For navigation after login
+import Link from "next/link"; // For navigation links
+import { Button } from "@/components/ui/button"; // UI button
+import { Input } from "@/components/ui/input"; // UI input
+import { Label } from "@/components/ui/label"; // UI label
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // UI card
 
 
-export default function LoginPage() {
+const LoginPage = () => {
+    // State for form fields
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    // State for error and loading
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    // Get login function from AuthProvider
+    const { login } = useAuth();
+    // Router for navigation
+    const router = useRouter();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // Handles form submission for login
+    // Calls login from AuthProvider and redirects to customers on success
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Login attempt:", { username, password });
-        // Add your login logic here
+        setError(null);
+        setLoading(true);
+        try {
+            await login({ email: username, password });
+            router.push('/customers');
+        } catch (err: any) {
+            setError(err.message || 'Login failed');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -70,3 +95,5 @@ export default function LoginPage() {
         </div>
     );
 }
+
+export default LoginPage;

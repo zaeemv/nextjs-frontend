@@ -1,17 +1,33 @@
+
+// signup/page.tsx
+// This page renders the signup form and handles user registration.
+// On successful signup, the user is redirected to the login page.
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 
+import { useState } from 'react'; // For managing form state
+import { useAuth } from '@/components/AuthProvider'; // For accessing signup function
+import { useRouter } from 'next/navigation'; // For navigation after signup
+import Link from 'next/link'; // For navigation links
 
-export default function SignupPage() {
+const SignupPage = () => {
+    // State for form fields
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
         email: '',
         password: '',
     });
+    // State for error and loading
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    // Get signup function from AuthProvider
+    const { signup } = useAuth();
+    // Router for navigation
+    const router = useRouter();
 
+
+    // Handles input changes for all form fields
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -20,10 +36,21 @@ export default function SignupPage() {
         }));
     };
 
+
+    // Handles form submission for signup
+    // Calls signup from AuthProvider and redirects to login on success
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Add signup logic here
-        console.log('Signup attempt:', formData);
+        setError(null);
+        setLoading(true);
+        try {
+            await signup({ email: formData.email, password: formData.password });
+            router.push('/login');
+        } catch (err: any) {
+            setError(err.message || 'Signup failed');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -116,3 +143,5 @@ export default function SignupPage() {
         </div>
     );
 }
+
+export default SignupPage;
