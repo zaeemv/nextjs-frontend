@@ -49,12 +49,8 @@ export const getCustomers = async (token?: string | null) => {
 export async function login({ username, password }: { username: string; password: string }) {
   // Create form-encoded data for OAuth2 password flow
   const formData = new URLSearchParams();
-  formData.append('grant_type', 'password');
   formData.append('username', username);
   formData.append('password', password);
-  formData.append('scope', '');
-  formData.append('client_id', '');
-  formData.append('client_secret', '');
 
   const res = await api.post('/auth/login', formData, {
     headers: {
@@ -64,6 +60,8 @@ export async function login({ username, password }: { username: string; password
   const { access_token } = res.data;
   if (access_token) {
     localStorage.setItem('token', access_token);
+    // Also set cookie for server-side checks (middleware)
+    document.cookie = `token=${access_token}; path=/;`;
   }
   return res.data;
 }
@@ -78,6 +76,8 @@ export async function signup({ username, email, full_name, password }: { usernam
 // Logs out the current user by removing the JWT token from localStorage.
 export async function logout() {
   localStorage.removeItem('token');
+  // Also clear the cookie
+  document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
   // Optionally, you can also notify the backend if needed
   return { message: 'Logged out' };
 }
